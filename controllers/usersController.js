@@ -27,7 +27,7 @@ exports.getUserById = async (req, res) => {
     }
 
     if (data && data.length > 0) {
-      return res.status(200).json(data[0]); // Retorna o usuário encontrado
+      return res.status(200).json(data[0]);
     } else {
       return res.status(404).json({ error: 'Usuário não encontrado.' });
     }
@@ -41,12 +41,21 @@ exports.createUser = async (req, res) => {
   try{
     const { name, username, email, password, balance } = req.body
     const {data: verifyUser, errorverifyUser} = await supabase.from('users').select('email').eq('email', email)
-
+    
     if (errorverifyUser) {
       return res.status(500).json({error: `Erro ao verificar se já existe um usuario com email: ${email}`})
     }
     if (verifyUser && verifyUser.length > 0){
       return res.status(409).json({ error: 'Usuário já existente.' })
+    }
+    
+    const {data: verifyUserName, errorverifyUserName} = await supabase.from('users').select('username').eq('username', username)
+
+    if (errorverifyUserName) {
+      return res.status(500).json({error: `Erro ao verificar se já existe um usuario com username: ${username}`})
+    }
+    if (verifyUserName && verifyUserName.length > 0){
+      return res.status(409).json({ error: 'Nome de usuário já existente.' })
     }
 
     const { error } = await supabase.from('users').insert([{name: name, username: username, email: email, password: password, balance: balance}])
